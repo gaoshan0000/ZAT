@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" 
+    android:background="@drawable/w01" 
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent"
+  >
+    
+    <TextView 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content" 
+        android:gravity="center"         
+        android:text=" \n \n智安通，为社会安全做出贡献" 
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="35dp"
+        android:textSize="22sp"
+        android:textColor="#fff" 
+        />
+      <Button
+              android:id="@+id/startBtn"
+              android:layout_width="120dp"
+              android:layout_height="wrap_content"
+              android:layout_alignParentBottom="true"
+              android:layout_centerHorizontal="true"
+              android:layout_marginBottom="120dp"
+              android:text="开始"
+              android:textSize="18sp"
+              android:textColor="#fff"
+              android:background="@drawable/btn_style_green"              
+			  android:layout_gravity="center_vertical"
+			  android:onClick="startbutton"
+              />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/startBtn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp">
+
+        <CheckBox
+            android:id="@+id/public_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="群众"
+            android:textColor="#fff"
+            android:layout_marginLeft="30dp"
+            android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/police_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/public_check"
+            android:checked="false"
+            android:text="警员"
+            android:textColor="#fff"
+            android:layout_marginLeft="20dp"
+            android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/sheriff_check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/police_check"
+            android:checked="false"
+            android:layout_marginLeft="20dp"
+            android:text="警长"
+            android:textColor="#fff"
+            android:textSize="18sp" />
+    </RelativeLayout>
+  
+</RelativeLayout>
