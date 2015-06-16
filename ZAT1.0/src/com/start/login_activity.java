@@ -32,6 +32,7 @@ public class login_activity extends Activity{
 	        {
 	             Intent intent = new Intent();
 	             intent.setClass(login_activity.this,Event_review_activity.class);
+	             intent.putExtra("id", mUser.getText().toString());//获得警员的警号
 	             startActivity(intent);
 	             //Toast.makeText(getApplicationContext(), "登录成功", Toast.LENGTH_SHORT).show();
 	          }

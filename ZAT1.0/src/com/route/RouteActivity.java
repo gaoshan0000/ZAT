@@ -48,7 +48,11 @@ import com.route.RouteSearchPoiDialog.OnListItemClick;
 import com.gongyong.ToastUtil;
 
 
-
+/**
+ * 导航
+ * @author 思宁
+ *
+ */
 public class RouteActivity extends Activity implements OnMarkerClickListener,
 OnMapClickListener, OnInfoWindowClickListener, InfoWindowAdapter,
 OnPoiSearchListener, OnRouteSearchListener, OnClickListener {
@@ -84,6 +88,7 @@ private boolean isClickTarget = false;
 private Marker startMk, targetMk;
 private RouteSearch routeSearch;
 public ArrayAdapter<String> aAdapter;
+private String location_end="";//到达路径
 
 @Override
 protected void onCreate(Bundle bundle) {
@@ -92,6 +97,7 @@ requestWindowFeature(Window.FEATURE_NO_TITLE);
 setContentView(R.layout.route_activity);
 mapView = (MapView) findViewById(R.id.map);
 mapView.onCreate(bundle);// 姝ゆ柟娉曞繀椤婚噸鍐�
+location_end = getIntent().getStringExtra("location");//到达的位置
 init();
 }
 
@@ -107,6 +113,9 @@ routeSearch = new RouteSearch(this);
 routeSearch.setRouteSearchListener(this);
 startTextView = (EditText) findViewById(R.id.autotextview_roadsearch_start);
 endTextView = (EditText) findViewById(R.id.autotextview_roadsearch_goals);
+if(!location_end.equals("")){
+	endTextView.setText(location_end);
+}
 busButton = (Button) findViewById(R.id.imagebtn_roadsearch_tab_transit);
 busButton.setOnClickListener(this);
 drivingButton = (Button) findViewById(R.id.imagebtn_roadsearch_tab_driving);

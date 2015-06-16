@@ -6,6 +6,19 @@ import java.util.List;
 
 
 
+
+
+
+
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.location.LocationManagerProxy;
@@ -28,7 +41,10 @@ import com.amap.api.maps2d.AMap.OnMapLoadedListener;
 import com.amap.api.maps2d.AMap.OnMarkerClickListener;
 import com.amap.api.maps2d.AMap.OnMarkerDragListener;
 import com.amap.api.maps2d.LocationSource.OnLocationChangedListener;
+import com.amap.location.demo.MultyLocationActivity;
 import com.amap.location.demo.R;
+import com.baoan.baoan_submit;
+import com.gongyong.Case;
 import com.gongyong.Constants;
 import com.gongyong.ToastUtil;
 
@@ -43,9 +59,9 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -59,18 +75,21 @@ import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+//在地图上面显示案件-警员
 public class Event_review_activity extends Activity implements 
 	OnInfoWindowClickListener, OnMapLoadedListener,
 	OnClickListener, InfoWindowAdapter,LocationSource,
 	AMapLocationListener{
-//	private MarkerOptions markerOption;
-//	private TextView markerText;
+	//	private MarkerOptions markerOption;
+	//	private TextView markerText;
 	//private Button markerButton;
 	//private RadioGroup radioOption;
+	private String id;//警员警号
 	private AMap aMap;
 	private MapView mapView;
-//	private Marker marker2;
+	//	private Marker marker2;
 	private LatLng latlng = new LatLng(36.061, 103.834);
+	private List<Case> cases;//所有的事件
 	
 	private OnLocationChangedListener mListener;
 	private LocationManagerProxy mAMapLocationManager;
@@ -80,6 +99,7 @@ public class Event_review_activity extends Activity implements
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
 		setContentView(R.layout.jingyuan_view);
+		id = getIntent().getStringExtra("id");//警员警号
 		mapView = (MapView) findViewById(R.id.map);
 		mapView.onCreate(savedInstanceState); 
 		init();
@@ -89,7 +109,7 @@ public class Event_review_activity extends Activity implements
 		//markerText = (TextView) findViewById(R.id.mark_listenter_text);
 		//radioOption = (RadioGroup) findViewById(R.id.custom_info_window_options);
 		//markerButton = (Button) findViewById(R.id.marker_button);
-		//markerButton.setOnClickListener(this);
+		//markerButton.setOnClickListener(this);		
 		Button clearMap = (Button) findViewById(R.id.clearMap);
 		clearMap.setOnClickListener(this);
 		Button resetMap = (Button) findViewById(R.id.resetMap);
@@ -147,15 +167,42 @@ public class Event_review_activity extends Activity implements
 		mapView.onDestroy();
 	}
 
+	//获取没被处理的案件
+	private void getAnJian(){		
+		cases = new ArrayList<Case>();
+		cases.add(new Case(1, "name1", "des1", "36.061, 103.834"));
+		cases.add(new Case(2, "name2", "des2", "30.679879, 104.064855"));
+		cases.add(new Case(3, "name3", "des3", "34.341568, 108.940174"));
+		try{		
+			HttpPost request = new HttpPost(com.gongyong.Constants.SERVER_URL+"/getAnJian"); 
+			request.addHeader("Content-Type", "application/json; charset=utf-8"); 			
+			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
+			if (httpResponse.getStatusLine().getStatusCode() != 404) {
+				String result = EntityUtils.toString(httpResponse.getEntity());
+				JSONObject jsonObject = new JSONObject(result.toString());  //得到结果jsonObject.getString("d") 
+				//然后将得到的结果解析即可-到时候把这个换掉即可				
+			}																
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	//向地图上添加maker-要隔几秒就自动检测一次然后刷新一下
 	private void addMarkersToMap() {
-
-		Marker marker1=aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-				.position(Constants.CHENGDU)
-				.title("CHENGDU")
-				.icon(BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-				.draggable(true));
-		marker1.showInfoWindow();
+		//从服务器获取信息
+		getAnJian();
+		//然后显示到地图上
+		if(cases.size()>0){
+			for(int i = 0;i<cases.size();i++){
+				String loca = cases.get(i).getLocation();
+				Marker marker1=aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
+						.position(new LatLng(Double.parseDouble(loca.split(",")[0]), Double.parseDouble(loca.split(",")[1])))
+						.title(cases.get(i).getName()+","+cases.get(i).getDes())
+						.icon(BitmapDescriptorFactory
+								.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+						.draggable(true));
+				marker1.showInfoWindow();
+			}
+		}			
 //		markerOption = new MarkerOptions();
 //		markerOption.position(Constants.XIAN);
 //		markerOption.title("XIAN").snippet("坐标：34.341568, 108.940174");
@@ -176,20 +223,6 @@ public class Event_review_activity extends Activity implements
 //		aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
 //				.position(Constants.ZHENGZHOU).title("ZHENGZHOU").icons(giflist)
 //				.draggable(true).period(10));
-		Marker marker2=aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-				.position(Constants.ZHENGZHOU)
-				.title("ZHENGZHOU")
-				.icon(BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-				.draggable(true));
-		marker2.showInfoWindow();
-		Marker marker = aMap.addMarker(new MarkerOptions()
-		.position(latlng)
-		.title("案件描述信息")
-		.icon(BitmapDescriptorFactory
-				.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-		.draggable(true));
-		marker.showInfoWindow();
 	}
 
 //
@@ -246,7 +279,9 @@ public class Event_review_activity extends Activity implements
 //
 //	}
 	
-	protected void dialog() {
+	//传入案子的ID
+	protected void dialog(final int cId) {
+		Log.i("check", "ok-click");
 		  AlertDialog.Builder builder = new Builder(Event_review_activity.this);
 		  builder.setMessage("是否确认处理该事件");
 		  builder.setTitle("提示");
@@ -258,25 +293,46 @@ public class Event_review_activity extends Activity implements
 				
 			}});
 		  builder.setPositiveButton("确认", new DialogInterface.OnClickListener(){
-
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
-					// TODO Auto-generated method stub
-					Intent intent = new Intent (Event_review_activity.this,Event_description_avtivity.class);			
+					// 任务正在进行中
+					try{
+						HttpPost request = new HttpPost(com.gongyong.Constants.SERVER_URL+"/caseDoing"); 
+						request.addHeader("Content-Type", "application/json; charset=utf-8"); 
+						JSONObject jsonParams = new JSONObject();
+						jsonParams.put("id", cId);
+						jsonParams.put("pId", Integer.parseInt(id));
+						HttpEntity bodyEntity = new StringEntity(jsonParams.toString());
+						request.setEntity(bodyEntity);
+						HttpResponse httpResponse = new DefaultHttpClient().execute(request);
+						if (httpResponse.getStatusLine().getStatusCode() != 404) {
+							String result = EntityUtils.toString(httpResponse.getEntity());
+							JSONObject jsonObject = new JSONObject(result.toString());  //得到结果jsonObject.getString("d") 		
+							//判断是否为true，然后toast就行
+						}																
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+					Intent intent = new Intent (Event_review_activity.this,Event_description_avtivity.class);	
+					intent.putExtra("caseId", cId);					
 					startActivity(intent);	
 				}});
 		  builder.create().show();
 		 }
 	
+	//信息窗被点击，然后跳转到相应处理页面
 	@Override
-	public void onInfoWindowClick(Marker marker) {
-		dialog();
+	public void onInfoWindowClick(Marker marker) {		
+		String a = marker.getId();
+		int index = Integer.parseInt(a.substring(6));
+		Log.i("marker", cases.get(index-1).getId()+"");
+		dialog(cases.get(index-1).getId());
 //		Intent intent = new Intent (Event_review_activity.this,SuredealEvent.class);			
 //		startActivity(intent);	
 //		Intent intent = new Intent (Event_review_activity.this,Event_description_avtivity.class);			
 //		startActivity(intent);	
 	}
-//
+	
 //	@Override
 //	public void onMarkerDrag(Marker marker) {
 //		String curDes = marker.getTitle() + "onMarkerDrag:(lat,lng)\n("
