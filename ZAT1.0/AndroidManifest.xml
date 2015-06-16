@@ -16,7 +16,7 @@
         >
         <meta-data
             android:name="com.amap.api.v2.apikey"
-            android:value="3136f033466b0be55cd058854e844d2d" />
+            android:value="0eda11ef1f877ac0a074bdbf0955829b" />
 
         <activity
             android:name="com.start.welcome"

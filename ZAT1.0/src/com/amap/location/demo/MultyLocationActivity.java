@@ -38,6 +38,8 @@ public class MultyLocationActivity extends Activity implements LocationSource,
 	private OnLocationChangedListener mListener;
 	private LocationManagerProxy mAMapLocationManager;
 	private RadioGroup mGPSModeGroup;
+	private String location;//保存当前位置
+	private double geoLat,geoLng;//经纬度
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +83,9 @@ public class MultyLocationActivity extends Activity implements LocationSource,
 	    		     Toast toast = Toast.makeText(MultyLocationActivity.this, "填写报案信息", Toast.LENGTH_SHORT); 
 	    		     toast.show();
 	    		 	Intent forcastIntent=new Intent(MultyLocationActivity.this,baoan_submit.class);
+	    		 	forcastIntent.putExtra("location_now", location);
+	    		 	forcastIntent.putExtra("geoLat", geoLat);
+	    		 	forcastIntent.putExtra("geoLng", geoLng);
 	    			startActivity(forcastIntent);
 	    			break;      
 	    			}
@@ -171,6 +176,7 @@ public class MultyLocationActivity extends Activity implements LocationSource,
 	 */
 	@Override
 	public void onLocationChanged(Location location) {
+		
 	}
 
 	@Override
@@ -194,6 +200,13 @@ public class MultyLocationActivity extends Activity implements LocationSource,
 			if (amapLocation != null
 					&& amapLocation.getAMapException().getErrorCode() == 0) {
 				mListener.onLocationChanged(amapLocation);// 鏄剧ず绯荤粺灏忚摑鐐�
+				//获取位置信息
+				Bundle locBundle = amapLocation.getExtras();
+				if (locBundle != null) {
+				    location = locBundle.getString("desc");
+				}
+				geoLat = amapLocation.getLatitude();
+	            geoLng = amapLocation.getLongitude();  
 			} else {
 				Log.e("AmapErr","Location ERR:" + amapLocation.getAMapException().getErrorCode());
 			}

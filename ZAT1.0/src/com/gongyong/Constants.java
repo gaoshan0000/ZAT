@@ -31,4 +31,8 @@ public class Constants {
 	public static final LatLng CHENGDU = new LatLng(30.679879, 104.064855);// 鎴愰兘甯傜粡绾害
 	public static final LatLng XIAN = new LatLng(34.341568, 108.940174);// 瑗垮畨甯傜粡绾害
 	public static final LatLng ZHENGZHOU = new LatLng(34.7466, 113.625367);// 閮戝窞甯傜粡绾害
+	
+	//自己添加
+		public static final String SERVER_URL = "http://192.168.50.239/test2/Service1.asmx";//服务器地址
+		public static final String URL = "http://192.168.50.239/test2/Service1.asmx?WSDL";//服务器地址?WSDL
 }
