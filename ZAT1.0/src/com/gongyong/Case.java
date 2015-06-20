@@ -11,10 +11,12 @@ import java.util.Set;
  */
 public class Case {
 	private int id;
+	private int pId;
 	private String name;
 	private String des;
 	private String img;
 	private String location;
+	private Boolean isHandled;
 	private Date date;
 	public Date getDate() {
 		return date;
@@ -34,7 +36,39 @@ public class Case {
 	public String getName() {
 		return name;
 	}
-	public Case(int id,String name,String des,String location){
+	public Boolean getIsHandled() {
+		return isHandled;
+	}
+	public int getpId() {
+		return pId;
+	}
+	public void setpId(int pId) {
+		this.pId = pId;
+	}
+	public void setIsHandled(Boolean isHandled) {
+		this.isHandled = isHandled;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public void setDate(Date d) {
+		this.date = d;
+	}
+	public void setDes(String des) {
+		this.des = des;
+	}
+	public void setImg(String img) {
+		this.img = img;
+	}
+	public void setLocation(String location) {
+		this.location = location;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Case(){	
+}
+public Case(int id,String name,String des,String location){
 		this.id = id;
 		this.name = name;
 		this.des = des;

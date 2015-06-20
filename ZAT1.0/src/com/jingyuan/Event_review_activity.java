@@ -1,8 +1,18 @@
 package com.jingyuan;
 
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+
+
+
+
+
+
+
+
 
 
 
@@ -46,7 +56,9 @@ import com.amap.location.demo.R;
 import com.baoan.baoan_submit;
 import com.gongyong.Case;
 import com.gongyong.Constants;
+import com.gongyong.HttpConnSoap2;
 import com.gongyong.ToastUtil;
+import com.gongyong.XMLParase;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -74,6 +86,7 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 //在地图上面显示案件-警员
 public class Event_review_activity extends Activity implements 
@@ -167,62 +180,46 @@ public class Event_review_activity extends Activity implements
 		mapView.onDestroy();
 	}
 
-	//获取没被处理的案件
-	private void getAnJian(){		
-		cases = new ArrayList<Case>();
-		cases.add(new Case(1, "name1", "des1", "36.061, 103.834"));
-		cases.add(new Case(2, "name2", "des2", "30.679879, 104.064855"));
-		cases.add(new Case(3, "name3", "des3", "34.341568, 108.940174"));
-		try{		
-			HttpPost request = new HttpPost(com.gongyong.Constants.SERVER_URL+"/getAnJian"); 
-			request.addHeader("Content-Type", "application/json; charset=utf-8"); 			
-			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
-			if (httpResponse.getStatusLine().getStatusCode() != 404) {
-				String result = EntityUtils.toString(httpResponse.getEntity());
-				JSONObject jsonObject = new JSONObject(result.toString());  //得到结果jsonObject.getString("d") 
-				//然后将得到的结果解析即可-到时候把这个换掉即可				
-			}																
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
+	//有点问题，只显示一个
 	//向地图上添加maker-要隔几秒就自动检测一次然后刷新一下
 	private void addMarkersToMap() {
-		//从服务器获取信息
-		getAnJian();
-		//然后显示到地图上
-		if(cases.size()>0){
-			for(int i = 0;i<cases.size();i++){
-				String loca = cases.get(i).getLocation();
-				Marker marker1=aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-						.position(new LatLng(Double.parseDouble(loca.split(",")[0]), Double.parseDouble(loca.split(",")[1])))
-						.title(cases.get(i).getName()+","+cases.get(i).getDes())
-						.icon(BitmapDescriptorFactory
-								.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-						.draggable(true));
-				marker1.showInfoWindow();
-			}
-		}			
-//		markerOption = new MarkerOptions();
-//		markerOption.position(Constants.XIAN);
-//		markerOption.title("XIAN").snippet("坐标：34.341568, 108.940174");
-//		markerOption.draggable(true);
-//		markerOption.icon(BitmapDescriptorFactory
-//				.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).draggable(true);
-//				.fromResource(R.drawable.arrow));
-//		marker2 = aMap.addMarker(markerOption);
-//		marker2.setRotateAngle(90);
-
-//		ArrayList<BitmapDescriptor> giflist = new ArrayList<BitmapDescriptor>();
-//		giflist.add(BitmapDescriptorFactory
-//				.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-//		giflist.add(BitmapDescriptorFactory
-//				.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-//		giflist.add(BitmapDescriptorFactory
-//				.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-//		aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-//				.position(Constants.ZHENGZHOU).title("ZHENGZHOU").icons(giflist)
-//				.draggable(true).period(10));
+		cases = new ArrayList<Case>();
+		new Thread(){
+			public void run() {
+				try{		
+					HttpConnSoap2 webservice = new HttpConnSoap2();  
+					String methodName = "getAnJian";//方法名  
+					ArrayList<String> paramList = new ArrayList<String>();  
+					ArrayList<String> parValueList = new ArrayList<String>();
+					paramList.add ("id");//指定参数名  
+					parValueList.add ("001");//指定参数值  
+					InputStream inputStream = webservice.GetWebServre (methodName, paramList, parValueList);  
+					cases = XMLParase.paraseCommentInfors (inputStream);
+					//然后显示到地图上
+					String loca = "";
+					if(cases.size()>0){
+						for(int i = 0;i<cases.size();i++){
+							loca = cases.get(i).getLocation();
+							final Marker marker1=aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
+									.position(new LatLng(Double.parseDouble(loca.split(",")[0]), Double.parseDouble(loca.split(",")[1])))
+									.title(cases.get(i).getName()+","+cases.get(i).getDes())
+									.icon(BitmapDescriptorFactory
+											.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+									.draggable(true));
+							new Runnable() {								
+								@Override
+								public void run() {
+									// TODO Auto-generated method stub
+									marker1.showInfoWindow();
+								}
+							};							
+						}
+					}									
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			};
+		}.start();		
 	}
 
 //

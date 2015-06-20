@@ -33,6 +33,7 @@ public class Constants {
 	public static final LatLng ZHENGZHOU = new LatLng(34.7466, 113.625367);// 閮戝窞甯傜粡绾害
 	
 	//自己添加
-		public static final String SERVER_URL = "http://192.168.50.239/test2/Service1.asmx";//服务器地址
+//		public static final String SERVER_URL = "http://192.168.50.239/PoliceService/MyService.asmx";//服务器地址
+	public static final String SERVER_URL = "http://192.168.1.108/test_new/Service1.asmx";//服务器地址
 		public static final String URL = "http://192.168.50.239/test2/Service1.asmx?WSDL";//服务器地址?WSDL
 }

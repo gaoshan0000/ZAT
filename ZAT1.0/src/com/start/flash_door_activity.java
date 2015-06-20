@@ -23,7 +23,7 @@ public class flash_door_activity extends Activity{
 	private ImageView mRight;
 	private TextView mText;
 	String string;
-//	int label;
+	//	int label;
 
     @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -75,12 +75,12 @@ public class flash_door_activity extends Activity{
 		    			 flash_door_activity.this.finish();
 		    		 }
 		    		 else if (string.equals("1")){
-		    			 Intent intent = new Intent (flash_door_activity.this,login_regist_activity.class);			
+		    			 Intent intent = new Intent (flash_door_activity.this,login_activity.class);			
 		    			 startActivity(intent);			
 		    			 flash_door_activity.this.finish();
 		    		 }
 		    		 else if (string.equals("2")){
-		    			 Intent intent = new Intent (flash_door_activity.this,login_regist_activity.class);			
+		    			 Intent intent = new Intent (flash_door_activity.this,login_activity_jingzhang.class);			
 		    			 startActivity(intent);			
 		    			 flash_door_activity.this.finish();
 		    		 }
