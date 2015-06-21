@@ -1,8 +1,14 @@
 package com.jingzhang;
 
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+
+
+
+
 
 
 
@@ -29,8 +35,13 @@ import com.amap.api.maps2d.AMap.OnMarkerClickListener;
 import com.amap.api.maps2d.AMap.OnMarkerDragListener;
 import com.amap.api.maps2d.LocationSource.OnLocationChangedListener;
 import com.amap.location.demo.R;
+import com.gongyong.Case;
 import com.gongyong.Constants;
+import com.gongyong.HttpConnSoap2;
 import com.gongyong.ToastUtil;
+import com.gongyong.XMLParase;
+import com.jingyuan.Event_description_avtivity;
+import com.jingyuan.Event_review_activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -43,9 +54,9 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -71,6 +82,7 @@ public class Event_jingzhang extends Activity implements
 	private MapView mapView;
 //	private Marker marker2;
 	private LatLng latlng = new LatLng(36.061, 103.834);
+	private List<Case> cases;//所有的事件
 	
 	private OnLocationChangedListener mListener;
 	private LocationManagerProxy mAMapLocationManager;
@@ -80,11 +92,33 @@ public class Event_jingzhang extends Activity implements
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
 		setContentView(R.layout.jingzhang_view);
+		cases = new ArrayList<Case>();
+		getData.start();  //得到数据
 		mapView = (MapView) findViewById(R.id.map_jingzhang);
 		mapView.onCreate(savedInstanceState); 
 		init();
 	}
 
+	Thread getData =  new Thread(){
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			try{		
+				HttpConnSoap2 webservice = new HttpConnSoap2();  
+				String methodName = "getAnJianAll";//方法名  
+				ArrayList<String> paramList = new ArrayList<String>();  
+				ArrayList<String> parValueList = new ArrayList<String>();
+				paramList.add ("id");//指定参数名  
+				parValueList.add ("001");//指定参数值  
+				InputStream inputStream = webservice.GetWebServre (methodName, paramList, parValueList);  
+				cases= XMLParase.paraseCommentInfors (inputStream);
+				//然后显示到地图上		
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	};
+	
 	private void init() {
 		//markerText = (TextView) findViewById(R.id.mark_listenter_text);
 		//radioOption = (RadioGroup) findViewById(R.id.custom_info_window_options);
@@ -103,15 +137,15 @@ public class Event_jingzhang extends Activity implements
 	private void setUpMap() {
 		MyLocationStyle myLocationStyle = new MyLocationStyle();
 		myLocationStyle.myLocationIcon(BitmapDescriptorFactory
-				.fromResource(R.drawable.location_marker));// 璁剧疆灏忚摑鐐圭殑鍥炬爣
-		myLocationStyle.strokeColor(Color.BLACK);// 璁剧疆鍦嗗舰鐨勮竟妗嗛鑹�
-		myLocationStyle.radiusFillColor(Color.argb(100, 0, 0, 180));// 璁剧疆鍦嗗舰鐨勫～鍏呴鑹�
-		// myLocationStyle.anchor(int,int)//璁剧疆灏忚摑鐐圭殑閿氱偣
-		myLocationStyle.strokeWidth(1.0f);// 璁剧疆鍦嗗舰鐨勮竟妗嗙矖缁�
+				.fromResource(R.drawable.location_marker));// 鐠佸墽鐤嗙亸蹇氭憫閻愬湱娈戦崶鐐垼
+		myLocationStyle.strokeColor(Color.BLACK);// 鐠佸墽鐤嗛崷鍡楄埌閻ㄥ嫯绔熷鍡涱杹閼癸拷
+		myLocationStyle.radiusFillColor(Color.argb(100, 0, 0, 180));// 鐠佸墽鐤嗛崷鍡楄埌閻ㄥ嫬锝為崗鍛搭杹閼癸拷
+		// myLocationStyle.anchor(int,int)//鐠佸墽鐤嗙亸蹇氭憫閻愬湱娈戦柨姘卞仯
+		myLocationStyle.strokeWidth(1.0f);// 鐠佸墽鐤嗛崷鍡楄埌閻ㄥ嫯绔熷鍡欑煐缂侊拷
 		aMap.setMyLocationStyle(myLocationStyle);
-		aMap.setLocationSource(this);// 璁剧疆瀹氫綅鐩戝惉
-		aMap.getUiSettings().setMyLocationButtonEnabled(true);// 璁剧疆榛樿瀹氫綅鎸夐挳鏄惁鏄剧ず
-		aMap.setMyLocationEnabled(true);// 璁剧疆涓簍rue琛ㄧず鏄剧ず瀹氫綅灞傚苟鍙Е鍙戝畾浣嶏紝false琛ㄧず闅愯棌瀹氫綅灞傚苟涓嶅彲瑙﹀彂瀹氫綅锛岄粯璁ゆ槸false
+		aMap.setLocationSource(this);// 鐠佸墽鐤嗙�规矮缍呴惄鎴濇儔
+		aMap.getUiSettings().setMyLocationButtonEnabled(true);// 鐠佸墽鐤嗘妯款吇鐎规矮缍呴幐澶愭尦閺勵垰鎯侀弰鍓с仛
+		aMap.setMyLocationEnabled(true);// 鐠佸墽鐤嗘稉绨峳ue鐞涖劎銇氶弰鍓с仛鐎规矮缍呯仦鍌氳嫙閸欘垵袝閸欐垵鐣炬担宥忕礉false鐞涖劎銇氶梾鎰鐎规矮缍呯仦鍌氳嫙娑撳秴褰茬憴锕�褰傜�规矮缍呴敍宀勭帛鐠併倖妲竑alse
 	   // aMap.setMyLocationType()
 		
 //		aMap.setOnMarkerDragListener(this);
@@ -148,55 +182,33 @@ public class Event_jingzhang extends Activity implements
 	}
 
 	private void addMarkersToMap() {
-
-		Marker marker1=aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-				.position(Constants.CHENGDU)
-				.title("CHENGDU")
-				.icon(BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-				.draggable(true));
-		marker1.showInfoWindow();
-//		markerOption = new MarkerOptions();
-//		markerOption.position(Constants.XIAN);
-//		markerOption.title("XIAN").snippet("坐标：34.341568, 108.940174");
-//		markerOption.draggable(true);
-//		markerOption.icon(BitmapDescriptorFactory
-//				.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).draggable(true);
-//				.fromResource(R.drawable.arrow));
-//		marker2 = aMap.addMarker(markerOption);
-//		marker2.setRotateAngle(90);
-
-//		ArrayList<BitmapDescriptor> giflist = new ArrayList<BitmapDescriptor>();
-//		giflist.add(BitmapDescriptorFactory
-//				.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
-//		giflist.add(BitmapDescriptorFactory
-//				.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-//		giflist.add(BitmapDescriptorFactory
-//				.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-//		aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-//				.position(Constants.ZHENGZHOU).title("ZHENGZHOU").icons(giflist)
-//				.draggable(true).period(10));
-		Marker marker2=aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-				.position(Constants.ZHENGZHOU)
-				.title("ZHENGZHOU")
-				.icon(BitmapDescriptorFactory
-						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-				.draggable(true));
-		marker2.showInfoWindow();
-		Marker marker = aMap.addMarker(new MarkerOptions()
-		.position(latlng)
-		.title("案件描述信息")
-		.icon(BitmapDescriptorFactory
-				.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-		.draggable(true));
-		marker.showInfoWindow();
+		String loca = "";
+		if(cases.size() >0){
+			for(int i =0;i<cases.size();i++){
+				loca = cases.get(i).getLocation();
+				//Log.i("123","asfdfds:"+cases.get(i).getDes()+" "+cases.get(i).getId());
+				MarkerOptions markerOption = new MarkerOptions().anchor(0.5f, 0.5f)
+						.position(new LatLng(Double.parseDouble(loca.split(",")[0]), Double.parseDouble(loca.split(",")[1])))
+						.title(cases.get(i).getName()+","+cases.get(i).getDes())						
+						.draggable(true);				
+				if(cases.get(i).getIsHandled() == 0){//未处理
+					markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+				}else if(cases.get(i).getIsHandled() == 1){//已处理
+					markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+				}else if(cases.get(i).getIsHandled() == 2){//正在处理
+					markerOption.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+				}
+				Marker marker = aMap.addMarker(markerOption);
+				marker.showInfoWindow();		
+			}
+		}
 	}
 
 //
 //	public void drawMarkers() {
 //		Marker marker = aMap.addMarker(new MarkerOptions()
 //				.position(latlng)
-//				.title("案件描述信息")
+//				.title("妗堜欢鎻忚堪淇℃伅")
 //				.icon(BitmapDescriptorFactory
 //						.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
 //				.draggable(true));
@@ -248,16 +260,16 @@ public class Event_jingzhang extends Activity implements
 	
 //	protected void dialog() {
 //		  AlertDialog.Builder builder = new Builder(Event_jingzhang.this);
-//		  builder.setMessage("是否确认处理该事件");
-//		  builder.setTitle("提示");
-//		  builder.setPositiveButton("取消",new DialogInterface.OnClickListener(){
+//		  builder.setMessage("鏄惁纭澶勭悊璇ヤ簨浠�");
+//		  builder.setTitle("鎻愮ず");
+//		  builder.setPositiveButton("鍙栨秷",new DialogInterface.OnClickListener(){
 //
 //			@Override
 //			public void onClick(DialogInterface arg0, int arg1) {
 //				// TODO Auto-generated method stub
 //				
 //			}});
-//		  builder.setPositiveButton("确认", new DialogInterface.OnClickListener(){
+//		  builder.setPositiveButton("纭", new DialogInterface.OnClickListener(){
 //
 //				@Override
 //				public void onClick(DialogInterface arg0, int arg1) {
@@ -268,13 +280,17 @@ public class Event_jingzhang extends Activity implements
 //		  builder.create().show();
 //		 }
 	
+	//案件点击查看详情
 	@Override
 	public void onInfoWindowClick(Marker marker) {
-//		dialog();
-//		Intent intent = new Intent (Event_review_activity.this,SuredealEvent.class);			
-//		startActivity(intent);	
-//		Intent intent = new Intent (Event_review_activity.this,Event_description_avtivity.class);			
-//		startActivity(intent);	
+		String a = marker.getId();
+		int index = Integer.parseInt(a.substring(6));
+		Log.i("marker", cases.get(index-1).getId()+"");
+		Intent intent = new Intent (Event_jingzhang.this,Event_detail_activity.class);	
+		Bundle data = new Bundle();
+		data.putSerializable("caseInfo", cases.get(index-1));  
+		intent.putExtras(data);  			
+		startActivity(intent);	
 	}
 //
 //	@Override
@@ -391,7 +407,7 @@ public class Event_jingzhang extends Activity implements
 	}
 
 	/**
-	 * 姝ゆ柟娉曞凡缁忓簾寮�
+	 * 濮濄倖鏌熷▔鏇炲嚒缂佸繐绨惧锟�
 	 */
 	@Override
 	public void onLocationChanged(Location location) {
@@ -410,17 +426,17 @@ public class Event_jingzhang extends Activity implements
 	}
 
 	/**
-	 * 瀹氫綅鎴愬姛鍚庡洖璋冨嚱鏁�
+	 * 鐎规矮缍呴幋鎰閸氬骸娲栫拫鍐ㄥ毐閺侊拷
 	 */
 	@Override
 	public void onLocationChanged(AMapLocation aLocation) {
 		if (mListener != null && aLocation != null) {
-			mListener.onLocationChanged(aLocation);// 鏄剧ず绯荤粺灏忚摑鐐�
+			mListener.onLocationChanged(aLocation);// 閺勫墽銇氱化鑽ょ埠鐏忓繗鎽戦悙锟�
 		}
 	}
 
 	/**
-	 * 婵�娲诲畾浣�
+	 * 濠碉拷濞茶鐣炬担锟�
 	 */
 	@Override
 	public void activate(OnLocationChangedListener listener) {
@@ -429,9 +445,9 @@ public class Event_jingzhang extends Activity implements
 			mAMapLocationManager = LocationManagerProxy.getInstance(this);
 			/*
 			 * mAMapLocManager.setGpsEnable(false);
-			 * 1.0.2鐗堟湰鏂板鏂规硶锛岃缃畉rue琛ㄧず娣峰悎瀹氫綅涓寘鍚玤ps瀹氫綅锛宖alse琛ㄧず绾綉缁滃畾浣嶏紝榛樿鏄痶rue Location
-			 * API瀹氫綅閲囩敤GPS鍜岀綉缁滄贩鍚堝畾浣嶆柟寮�
-			 * 锛岀涓�涓弬鏁版槸瀹氫綅provider锛岀浜屼釜鍙傛暟鏃堕棿鏈�鐭槸2000姣锛岀涓変釜鍙傛暟璺濈闂撮殧鍗曚綅鏄背锛岀鍥涗釜鍙傛暟鏄畾浣嶇洃鍚��
+			 * 1.0.2閻楀牊婀伴弬鏉款杻閺傝纭堕敍宀冾啎缂冪晧rue鐞涖劎銇氬ǎ宄版値鐎规矮缍呮稉顓炲瘶閸氱帳ps鐎规矮缍呴敍瀹朼lse鐞涖劎銇氱痪顖滅秹缂佹粌鐣炬担宥忕礉姒涙顓婚弰鐥秗ue Location
+			 * API鐎规矮缍呴柌鍥╂暏GPS閸滃瞼缍夌紒婊勮穿閸氬牆鐣炬担宥嗘煙瀵拷
+			 * 閿涘瞼顑囨稉锟芥稉顏勫棘閺佺増妲哥�规矮缍卲rovider閿涘瞼顑囨禍灞奸嚋閸欏倹鏆熼弮鍫曟？閺堬拷閻厽妲�2000濮ｎ偆顫楅敍宀�顑囨稉澶夐嚋閸欏倹鏆熺捄婵堫瀲闂傛挳娈ч崡鏇氱秴閺勵垳鑳岄敍宀�顑囬崶娑楅嚋閸欏倹鏆熼弰顖氱暰娴ｅ秶娲冮崥顒冿拷锟�
 			 */
 			mAMapLocationManager.requestLocationUpdates(
 					LocationProviderProxy.AMapNetwork, 2000, 10, this);
@@ -439,7 +455,7 @@ public class Event_jingzhang extends Activity implements
 	}
 
 	/**
-	 * 鍋滄瀹氫綅
+	 * 閸嬫粍顒涚�规矮缍�
 	 */
 	@Override
 	public void deactivate() {

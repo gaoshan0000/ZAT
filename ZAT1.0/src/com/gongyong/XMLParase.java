@@ -72,7 +72,7 @@ public class XMLParase {
                     else if (name.equalsIgnoreCase ("isHandled") )  
                     {  
                         eventType = parser.next();  
-                        info.setIsHandled(Boolean.parseBoolean(parser.getText() ));
+                        info.setIsHandled(Integer.parseInt(parser.getText() ));
                     }  
                     else if (name.equalsIgnoreCase ("pId") )  
                     {  

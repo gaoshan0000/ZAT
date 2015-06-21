@@ -15,11 +15,14 @@ import com.amap.location.demo.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class baoan_submit extends Activity{
 	String location_now;
@@ -34,7 +37,7 @@ public class baoan_submit extends Activity{
 		location_now = this.getIntent().getStringExtra("location_now");
 		lat = this.getIntent().getDoubleExtra("geoLat", 0);
 		lng = this.getIntent().getDoubleExtra("geoLng", 0);
-		((TextView)findViewById(R.id.baoaner_loc)).setText(location_now);
+		((Button)findViewById(R.id.baoaner_loc)).setText(location_now);
 		((TextView)findViewById(R.id.baoan_loc_edit)).setText(lat+","+lng);
 		
 		//确认
@@ -48,6 +51,7 @@ public class baoan_submit extends Activity{
 							HttpPost request = new HttpPost(com.gongyong.Constants.SERVER_URL+"/BaoAn"); 
 							request.addHeader("Content-Type", "application/json; charset=utf-8"); 
 							JSONObject jsonParams = new JSONObject();
+							fileName = "asdf";
 							jsonParams.put("caseName", ((TextView)findViewById(R.id.baoan_event_edit)).getText());
 							jsonParams.put("caseDes", ((TextView)findViewById(R.id.baoan_description_edit)).getText());
 							jsonParams.put("img", fileName); //这个因为拍照还没搞好，所以fileName还不是最后要存的东西
@@ -58,10 +62,16 @@ public class baoan_submit extends Activity{
 							if (httpResponse.getStatusLine().getStatusCode() != 404) {
 								String result = EntityUtils.toString(httpResponse.getEntity());
 								JSONObject jsonObject = new JSONObject(result.toString());  //得到结果jsonObject.getString("d") 
-								if(jsonObject.getString("d").equals("false")){ //不知道是不是
+								if(jsonObject.getString("d").equals("false")){ 
 									//添加失败
+									Looper.prepare();
+									Toast.makeText(getApplicationContext(), "添加失败", Toast.LENGTH_SHORT).show();			
+									Looper.loop();																
 								}else{ 
-									//添加成功			Toast						
+									//添加成功			Toast		
+									Looper.prepare();
+									Toast.makeText(getApplicationContext(), "添加成功", Toast.LENGTH_SHORT).show();			
+									Looper.loop();
 									Intent intent = new Intent(baoan_submit.this,MultyLocationActivity.class);
 									startActivity(intent);									
 								}

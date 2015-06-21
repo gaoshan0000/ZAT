@@ -1,19 +1,36 @@
 package com.start;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 
 
+
+import android.widget.Toast;
+
 import com.amap.location.demo.R;
 import com.jingyuan.Event_review_activity;
 import com.jingzhang.Event_jingzhang;
 
+/**
+ * 警长登录
+ * @author 思宁
+ *
+ */
 public class login_activity_jingzhang extends Activity{
 	private EditText mUser; // 帐号编辑框
 	private EditText mPassword; // 密码编辑框
@@ -29,14 +46,14 @@ public class login_activity_jingzhang extends Activity{
 	    }
 	 
 	 public void login__jingzhang(View v) {
-	    	if("123".equals(mUser.getText().toString()) && "123".equals(mPassword.getText().toString()))   //判断 帐号和密码
+	    /*	if("123".equals(mUser.getText().toString()) && "123".equals(mPassword.getText().toString()))   //判断 帐号和密码
 	        {
 	             Intent intent = new Intent();
 	             intent.setClass(login_activity_jingzhang.this,Event_jingzhang.class);
 	             startActivity(intent);
 	             //Toast.makeText(getApplicationContext(), "登录成功", Toast.LENGTH_SHORT).show();
-	          }
-	        else if("".equals(mUser.getText().toString()) || "".equals(mPassword.getText().toString()))   //判断 帐号和密码
+	          }*/
+		 if("".equals(mUser.getText().toString()) || "".equals(mPassword.getText().toString()))   //判断 帐号和密码
 	        {
 	        	new AlertDialog.Builder(login_activity_jingzhang.this)
 				.setIcon(getResources().getDrawable(R.drawable.login_error_icon))
@@ -45,12 +62,38 @@ public class login_activity_jingzhang extends Activity{
 				.create().show();
 	         }
 	        else{
-	           
-	        	new AlertDialog.Builder(login_activity_jingzhang.this)
-				.setIcon(getResources().getDrawable(R.drawable.login_error_icon))
-				.setTitle("登录失败")
-				.setMessage("帐号或者密码不正确，\n请检查后重新输入！")
-				.create().show();
+	        	new Thread(){
+	        		public void run() {
+	        			try{
+	        				HttpPost request = new HttpPost(com.gongyong.Constants.SERVER_URL+"/bLogin"); 
+	        				request.addHeader("Content-Type", "application/json; charset=utf-8"); 
+	        				JSONObject jsonParams = new JSONObject();
+	        				jsonParams.put("bId", Integer.parseInt(mUser.getText().toString()));
+	        				jsonParams.put("bPwd", mPassword.getText().toString());
+	        				HttpEntity bodyEntity = new StringEntity(jsonParams.toString());
+	        				request.setEntity(bodyEntity);
+	        				HttpResponse httpResponse = new DefaultHttpClient().execute(request);
+	        				if (httpResponse.getStatusLine().getStatusCode() != 404) {
+	        				String result = EntityUtils.toString(httpResponse.getEntity());
+	        				JSONObject jsonObject = new JSONObject(result.toString()); 
+	        				if(jsonObject.getString("d").equals("true")){
+	        					Looper.prepare();
+								Toast.makeText(getApplicationContext(), "登录成功", Toast.LENGTH_SHORT).show();			
+								Looper.loop();
+	        					  Intent intent = new Intent();
+	        			             intent.setClass(login_activity_jingzhang.this,Event_jingzhang.class);
+	        			             startActivity(intent);
+	        				}else{	        	
+	        					Looper.prepare();
+								Toast.makeText(getApplicationContext(), "帐号或者密码不正确, 请检查后重新输入！", Toast.LENGTH_SHORT).show();			
+								Looper.loop();
+	        				}
+	        				}
+	        			}catch(Exception e){
+	        				e.printStackTrace();
+	        			}
+	        		};
+	        	}.start();	           	        	
 	        }
 	 }
 	 public void login_back_jingzhang(View v) {     //标题栏 返回按钮

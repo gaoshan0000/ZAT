@@ -1,5 +1,6 @@
 package com.gongyong;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 
@@ -9,14 +10,14 @@ import java.util.Set;
  * @author Ë¼Äþ
  *
  */
-public class Case {
+public class Case implements Serializable {
 	private int id;
 	private int pId;
 	private String name;
 	private String des;
 	private String img;
 	private String location;
-	private Boolean isHandled;
+	private int isHandled;
 	private Date date;
 	public Date getDate() {
 		return date;
@@ -36,7 +37,7 @@ public class Case {
 	public String getName() {
 		return name;
 	}
-	public Boolean getIsHandled() {
+	public int getIsHandled() {
 		return isHandled;
 	}
 	public int getpId() {
@@ -45,7 +46,7 @@ public class Case {
 	public void setpId(int pId) {
 		this.pId = pId;
 	}
-	public void setIsHandled(Boolean isHandled) {
+	public void setIsHandled(int isHandled) {
 		this.isHandled = isHandled;
 	}
 	public void setId(int id) {

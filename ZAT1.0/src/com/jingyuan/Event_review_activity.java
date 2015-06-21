@@ -21,6 +21,14 @@ import java.util.List;
 
 
 
+
+
+
+
+
+
+
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -88,6 +96,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+//问题：数据隔一段时间就更新一次这个还没做
 //在地图上面显示案件-警员
 public class Event_review_activity extends Activity implements 
 	OnInfoWindowClickListener, OnMapLoadedListener,
@@ -112,12 +121,34 @@ public class Event_review_activity extends Activity implements
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE); 
 		setContentView(R.layout.jingyuan_view);
+		cases = new ArrayList<Case>();
+		getData.start();  //得到数据
 		id = getIntent().getStringExtra("id");//警员警号
 		mapView = (MapView) findViewById(R.id.map);
-		mapView.onCreate(savedInstanceState); 
-		init();
+		mapView.onCreate(savedInstanceState); 		
+		init();		
 	}
 
+	Thread getData =  new Thread(){
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			try{		
+				HttpConnSoap2 webservice = new HttpConnSoap2();  
+				String methodName = "getAnJian";//方法名  
+				ArrayList<String> paramList = new ArrayList<String>();  
+				ArrayList<String> parValueList = new ArrayList<String>();
+				paramList.add ("id");//指定参数名  
+				parValueList.add ("001");//指定参数值  
+				InputStream inputStream = webservice.GetWebServre (methodName, paramList, parValueList);  
+				cases= XMLParase.paraseCommentInfors (inputStream);
+				//然后显示到地图上		
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	};
+	
 	private void init() {
 		//markerText = (TextView) findViewById(R.id.mark_listenter_text);
 		//radioOption = (RadioGroup) findViewById(R.id.custom_info_window_options);
@@ -178,52 +209,28 @@ public class Event_review_activity extends Activity implements
 	protected void onDestroy() {
 		super.onDestroy();
 		mapView.onDestroy();
-	}
-
-	//有点问题，只显示一个
+	}		
+	
 	//向地图上添加maker-要隔几秒就自动检测一次然后刷新一下
-	private void addMarkersToMap() {
-		cases = new ArrayList<Case>();
-		new Thread(){
-			public void run() {
-				try{		
-					HttpConnSoap2 webservice = new HttpConnSoap2();  
-					String methodName = "getAnJian";//方法名  
-					ArrayList<String> paramList = new ArrayList<String>();  
-					ArrayList<String> parValueList = new ArrayList<String>();
-					paramList.add ("id");//指定参数名  
-					parValueList.add ("001");//指定参数值  
-					InputStream inputStream = webservice.GetWebServre (methodName, paramList, parValueList);  
-					cases = XMLParase.paraseCommentInfors (inputStream);
-					//然后显示到地图上
-					String loca = "";
-					if(cases.size()>0){
-						for(int i = 0;i<cases.size();i++){
-							loca = cases.get(i).getLocation();
-							final Marker marker1=aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
-									.position(new LatLng(Double.parseDouble(loca.split(",")[0]), Double.parseDouble(loca.split(",")[1])))
-									.title(cases.get(i).getName()+","+cases.get(i).getDes())
-									.icon(BitmapDescriptorFactory
-											.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-									.draggable(true));
-							new Runnable() {								
-								@Override
-								public void run() {
-									// TODO Auto-generated method stub
-									marker1.showInfoWindow();
-								}
-							};							
-						}
-					}									
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			};
-		}.start();		
+	private void addMarkersToMap() {			
+		String loca = "";
+		if(cases.size() >0){
+			for(int i =0;i<cases.size();i++){
+				loca = cases.get(i).getLocation();
+				Log.i("123","asfdfds:"+cases.get(i).getDes()+" "+cases.get(i).getId());
+				MarkerOptions markerOption = new MarkerOptions().anchor(0.5f, 0.5f)
+						.position(new LatLng(Double.parseDouble(loca.split(",")[0]), Double.parseDouble(loca.split(",")[1])))
+						.title(cases.get(i).getName()+","+cases.get(i).getDes())
+						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+						.draggable(true);
+				Marker marker = aMap.addMarker(markerOption);
+				marker.showInfoWindow();		
+			}
+		}
 	}
 
-//
-//	public void drawMarkers() {
+
+/*//	public void drawMarkers() {
 //		Marker marker = aMap.addMarker(new MarkerOptions()
 //				.position(latlng)
 //				.title("案件描述信息")
@@ -275,7 +282,8 @@ public class Event_review_activity extends Activity implements
 //		});
 //
 //	}
-	
+*/	
+
 	//传入案子的ID
 	protected void dialog(final int cId) {
 		Log.i("check", "ok-click");
@@ -293,26 +301,37 @@ public class Event_review_activity extends Activity implements
 				@Override
 				public void onClick(DialogInterface arg0, int arg1) {
 					// 任务正在进行中
-					try{
-						HttpPost request = new HttpPost(com.gongyong.Constants.SERVER_URL+"/caseDoing"); 
-						request.addHeader("Content-Type", "application/json; charset=utf-8"); 
-						JSONObject jsonParams = new JSONObject();
-						jsonParams.put("id", cId);
-						jsonParams.put("pId", Integer.parseInt(id));
-						HttpEntity bodyEntity = new StringEntity(jsonParams.toString());
-						request.setEntity(bodyEntity);
-						HttpResponse httpResponse = new DefaultHttpClient().execute(request);
-						if (httpResponse.getStatusLine().getStatusCode() != 404) {
-							String result = EntityUtils.toString(httpResponse.getEntity());
-							JSONObject jsonObject = new JSONObject(result.toString());  //得到结果jsonObject.getString("d") 		
-							//判断是否为true，然后toast就行
-						}																
-					}catch(Exception e){
-						e.printStackTrace();
-					}
-					Intent intent = new Intent (Event_review_activity.this,Event_description_avtivity.class);	
-					intent.putExtra("caseId", cId);					
-					startActivity(intent);	
+					new Thread(){
+						@Override
+						public void run() {
+							try{
+								HttpPost request = new HttpPost(com.gongyong.Constants.SERVER_URL+"/caseDoing"); 
+								request.addHeader("Content-Type", "application/json; charset=utf-8"); 
+								JSONObject jsonParams = new JSONObject();
+								jsonParams.put("id", cId);
+								jsonParams.put("pId", Integer.parseInt(id));
+								HttpEntity bodyEntity = new StringEntity(jsonParams.toString());
+								request.setEntity(bodyEntity);
+								HttpResponse httpResponse = new DefaultHttpClient().execute(request);
+								if (httpResponse.getStatusLine().getStatusCode() != 404) {
+									String result = EntityUtils.toString(httpResponse.getEntity());
+									JSONObject jsonObject = new JSONObject(result.toString());  //得到结果jsonObject.getString("d") 		
+									//判断是否为true，然后toast就行
+									if(jsonObject.getString("d").equals("true")){
+										Intent intent = new Intent (Event_review_activity.this,Event_description_avtivity.class);	
+										Bundle data = new Bundle();
+										data.putSerializable("caseInfo", cases.get(cId-1));  
+										intent.putExtras(data);  			
+										startActivity(intent);	
+									}else{					
+										Log.i("123","asdf:failed");
+									}									
+								}																
+							}catch(Exception e){
+								e.printStackTrace();
+							}
+						}
+					}.start();										
 				}});
 		  builder.create().show();
 		 }
