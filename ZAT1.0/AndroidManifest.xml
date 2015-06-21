@@ -122,6 +122,7 @@
         <activity android:name="com.jingzhang.Event_detail_activity"
              android:screenOrientation="portrait"
             android:label="@string/app_name"></activity>
+        <activity android:name="com.zhy.imageloader.MainActivity"></activity>
   
     
     </application>

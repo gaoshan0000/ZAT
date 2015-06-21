@@ -1,5 +1,7 @@
 package com.baoan;
 
+import java.util.List;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -11,6 +13,7 @@ import org.json.JSONObject;
 import com.amap.api.maps.MapView;
 import com.amap.location.demo.MultyLocationActivity;
 import com.amap.location.demo.R;
+import com.zhy.imageloader.MainActivity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -39,6 +42,17 @@ public class baoan_submit extends Activity{
 		lng = this.getIntent().getDoubleExtra("geoLng", 0);
 		((Button)findViewById(R.id.baoaner_loc)).setText(location_now);
 		((TextView)findViewById(R.id.baoan_loc_edit)).setText(lat+","+lng);
+		
+		//上传照片
+		//startforresult-然后就是点击之后返回图片的信息，然后上传，
+		//把两个代码融合到一起
+		((Button)findViewById(R.id.baoan_pic)).setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(baoan_submit.this,MainActivity.class);
+				startActivity(intent);
+			}
+		});
 		
 		//确认
 		((Button)findViewById(R.id.baoan_ok)).setOnClickListener(new OnClickListener() {			
